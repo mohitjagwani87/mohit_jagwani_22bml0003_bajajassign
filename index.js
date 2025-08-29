@@ -1,56 +1,72 @@
-const express = require('express');
+const express = require("express");
 const app = express();
+
 app.use(express.json());
 
-const PORT = process.env.PORT || 3000; // for hosting platforms
+const FULL_NAME= "john_doe";
+const DOB= "17091999";   // ddmmyyyy format
+const EMAIL= "john@xyz.com";
+const ROLL_NUMBER= "ABCD123";
+function isNumber(str){
+  return /^[0-9]+$/.test(str);
+}
+function isAlphabet(str){
+  return /^[a-zA-Z]+$/.test(str);
+}
+function isSpecialChar(str){
+  return !isNumber(str) && !isAlphabet(str);
+}
 
-app.post('/bfhl', (req, res) => {
-    const arr = req.body.array;
-    if (!Array.isArray(arr)) {
-        return res.status(400).json({ status: 'error', message: 'Input should be an array' });
-    }
-
-    const userId = "846384";
-    const email = "mohitkumaremail.com";
-    const rollNumber = "BML526";
-
-    let evenNumbers = [];
-    let oddNumbers = [];
+function alternatingCapsReverse(str){
+  let chars = str.split("").reverse();
+  return chars
+    .map((ch, i) => (i % 2 === 0 ? ch.toUpperCase() : ch.toLowerCase()))
+    .join("");
+}
+app.post("/bfhl", (req, res) => {
+  try {
+    const data = req.body.data || [];
+    let even_numbers = [];
+    let odd_numbers = [];
     let alphabets = [];
-    let specialChars = [];
+    let special_characters = [];
     let sum = 0;
-
-    arr.forEach(item => {
-        if (typeof item === 'number') {
-            if (item % 2 === 0) evenNumbers.push(item);
-            else oddNumbers.push(item);
-            sum += item;
-        } else if (/^[a-zA-Z]$/.test(item)) {
-            alphabets.push(item.toUpperCase());
+    let allAlphabetsConcat = "";
+    data.forEach(item => {
+      if (isNumber(item)) {
+        let num = parseInt(item, 10);
+        if (num % 2 === 0) {
+          even_numbers.push(item);
         } else {
-            specialChars.push(item);
+          odd_numbers.push(item);
         }
+        sum += num;
+      } else if (isAlphabet(item)) {
+        alphabets.push(item.toUpperCase());
+        allAlphabetsConcat += item;
+      } else if (isSpecialChar(item)) {
+        special_characters.push(item);
+      }
     });
-
-    let rev = alphabets.reverse().join('');
-    let alternatingCaps = rev.split('').map((char, j) =>
-        j % 2 === 0 ? char.toUpperCase() : char.toLowerCase()
-    ).join('');
-
-    return res.status(200).json({
-        status: "success",
-        userId,
-        email,
-        rollNumber,
-        evenNumbers,
-        oddNumbers,
-        alphabets,
-        specialChars,
-        sum,
-        alternatingCaps
-    });
+    const response ={
+      is_success: true,
+      user_id: ${FULL_NAME}_${DOB},
+      email: EMAIL,
+      roll_number: ROLL_NUMBER,
+      odd_numbers,
+      even_numbers,
+      alphabets,
+      special_characters,
+      sum: sum.toString(),
+      concat_string: alternatingCapsReverse(allAlphabetsConcat)
+    };
+    res.status(200).json(response);
+  } catch (err) {
+    res.status(500).json({ is_success: false, error: err.message });
+  }
 });
 
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+  console.log(Server running on port ${PORT});
 });
